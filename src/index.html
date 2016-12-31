@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>扫雷</title>
+	<style type="text/css">
+		/*cssret*/
+		body,p,h1,h2,h3,h4,h5,h6{margin: 0;padding: 0;}
+		body,button,input,select{font: 12px/1.5 tahoma,arial,\5b8b\4f53;}
+		/*clickArea*/
+		#clickArea{width: 400px;height: 320px;margin: 50px auto;position: relative;}
+		#clickArea p{text-align: center;font-size: 20px;font-weight: bold;color: blue;position: absolute;left:60px;top: 150px;}
+		.item{width: 12px;height: 12px;background: #ccc;border: 2px solid #aaa;border-top-color: #fff;border-left-color: #fff;position: absolute;display: block;}
+		.inner{width: 15px;height: 15px;border: 1px solid #aaa;text-align: center;line-height: 15px;position: absolute;cursor: default;}
+		#control{margin: 0 auto;width: 400px;text-align: center;}
+		.showInfo{display: inline-block;margin-left: 20px;}
+	</style>
+	<script type="text/javascript" src='jquery-3.1.1.min.js'></script>
+	<script type="text/javascript">
+	$(function(){
+		var $rank=$('#rank');
+		var $bombNum=$('#bombNum');
+		var $records=$('#records');
+		var $clickArea=$('#clickArea');
+		var setDate=[{'columns':10,'rows':10,'bombNum':10},{'columns':15,'rows':15,'bombNum':30},{'columns':25,'rows':20,'bombNum':75}];		
+
+		// 难度选择部分：		
+		$rank.on('change',function(){
+			switch($(this).val()){
+				case '1':{
+					$bombNum.html(setDate[0].bombNum);
+					if (localStorage.getItem('rank0')) {
+						$records.html(localStorage.getItem('rank0'));
+					}else{
+						$records.html('--');
+					}
+					break;					
+				}
+				case '2':{
+					$bombNum.html(setDate[1].bombNum);
+					if (localStorage.getItem('rank1')) {
+						$records.html(localStorage.getItem('rank1'));
+					}else{
+						$records.html('--');
+					}
+					break;					
+				}
+				case '3':{
+					$bombNum.html(setDate[2].bombNum);
+					if (localStorage.getItem('rank2')) {
+						$records.html(localStorage.getItem('rank2'));
+					}else{
+						$records.html('--');
+					}
+					break;					
+				}
+			}
+		});
+		$rank.trigger('change');
+
+		// 开始游戏，初始化界面；
+		$('#start').on('click',function(){
+			var rank=$rank.val()-1;
+			var baseX=(400-16*setDate[rank].columns)/2;
+			var baseY=(320-16*setDate[rank].rows)/2;
+			var str='';
+			var startFlag=false;
+			var startTime=0;
+			//产生底层以及遮罩
+			for (var i = 0; i < setDate[rank].rows; i++) {
+				var top=baseY+i*16;
+				for (var j = 0; j < setDate[rank].columns; j++) {
+					var left=baseX+j*16;
+					str+='<div class="inner" x="'+i+'" y="'+j+'" style="left:'+left+'px;top:'+top+'px;"></div><div class="item" x="'+i+'" y="'+j+'" flag="false" style="left:'+left+'px;top:'+top+'px;"></div>';
+				}
+			}
+			$clickArea.html(str); 
+			var $item=$('.item');
+			var $inner=$('.inner');
+			//产生雷
+			for (var i = 0; i < setDate[rank].bombNum; i++) {
+				var index=Math.floor(Math.random()*(setDate[rank].columns*setDate[rank].rows));
+				if ($inner.eq(index).html()=='') {
+					$inner.eq(index).html('*');
+				}else{
+					i--;
+					continue;
+				}
+			}
+			// 计算每个格子的雷值
+			for (var i = 0; i < setDate[rank].rows; i++) {
+				for (var j = 0; j < setDate[rank].columns; j++) {
+					index=setDate[rank].columns*i+j;
+					if ($inner.eq(index).html()=='*') {
+						continue;						
+					}else{
+						var bombCount=0;
+						for (var limitX = i-1; limitX <= i+1; limitX++) {
+							if (limitX<0 || limitX>=setDate[rank].rows) {continue;}
+							for (var limitY = j-1; limitY <= j+1; limitY++) {
+								if (limitY<0 || limitY>=setDate[rank].columns) {continue;}
+								var temp=setDate[rank].columns*limitX+limitY;
+								if ($inner.eq(temp).html()=='*') {
+									bombCount++;									
+								}
+							}
+						}
+						if (bombCount!=0) {
+							$inner.eq(index).html(bombCount);
+						}
+					}
+				}
+			}
+
+			var $preDown=$item.eq(0);
+			//鼠标弹起，模拟弹起按钮
+			$(document).on('mouseup',function(){
+				$preDown.css({
+					'border-top-color':'#fff',
+					'border-left-color':'#fff'					
+				});
+			})
+			//去除底层默认事件 不可选中，不弹出右键菜单
+			$inner.on('mousedown contextmenu',function(){
+					return false;
+				});	
+			//鼠标点击时，判断左右键	
+			$item.on('mousedown',function(e){
+				//左键，按下动画
+					if (e.which==1 && !this.flag) {
+						$preDown=$(this);
+						$(this).css({
+							'border-top-color':'#ccc',
+							'border-left-color':'#ccc'
+						});
+					}
+					//右键，flag标记增减
+					if(e.which==3){
+						if (!this.flag) {
+							$(this).css('background','#ccc url("flag.png") no-repeat left center');							
+							this.flag=true;
+						}else{
+							$(this).css('background','#ccc');
+							this.flag=false;
+						}
+					}
+					return false;
+				})
+				//点击事件，判断值
+				.on('click',function(){
+					var x=parseInt($(this).attr('x'));					
+					var y=parseInt($(this).attr('y'));
+					temp=setDate[rank].columns*x+y;
+					if (!startFlag) {
+						startFlag=true;
+						startTime=new Date();
+						startTime=startTime.getTime();
+					}
+
+					if (!this.flag) {
+						// 踩到雷
+						if ($inner.eq(temp).html()=="*") {
+							for (var i = 0; i < setDate[rank].columns*setDate[rank].rows; i++) {
+								if ($inner.eq(i).html()=="*") {
+									$inner.eq(i).css('background','orange');
+									$item.eq(i).css('display','none');
+								}
+							}
+							$inner.eq(temp).css('background','red');
+							setTimeout(function(){
+								if(confirm('踩到雷了！！要重新开始吗？')){
+									$('#start').trigger('click');
+								}
+								return;
+							},100);							
+						}
+						//踩到空白
+						if ($inner.eq(temp).html()=='') {
+							zeroOpen($inner.eq(temp));
+						}
+						$(this).css('display','none');
+						//判断结束
+						if ($('.item:visible').length==setDate[rank].bombNum) {
+							var endTime=new Date();
+							endTime=endTime.getTime();
+							var stillTime=(endTime-startTime)/1000;							
+							if (!localStorage.getItem('rank'+rank) || stillTime<localStorage.getItem('rank'+rank)) {
+								localStorage.setItem('rank'+rank,stillTime);
+								$records.html(localStorage.getItem('rank'+rank));
+								setTimeout(function(){
+									alert('恭喜，刷新了新记录~');
+									return;
+								},100);	
+							}else{
+								setTimeout(function(){
+									alert('恭喜，成功完成任务~');
+									return;
+								},100);	
+							}						
+						}						
+					}
+				})
+				//阻止右键菜单
+				.on('contextmenu',function(){
+					return false;
+				}
+			);
+			//打开大片空白的函数，递归调用
+			function zeroOpen($obj){
+				var x=parseInt($obj.attr('x'));
+				var y=parseInt($obj.attr('y'));
+				var leftTop=(x-1)*setDate[rank].columns+y-1;
+				var topTop=leftTop+1;
+				var rightTop=leftTop+2;
+				var leftLeft=x*setDate[rank].columns+y-1;
+				var rightRight=leftLeft+2;
+				var leftBottom=(x+1)*setDate[rank].columns+y-1;
+				var bottomBottom=leftBottom+1;
+				var rightBottom=leftBottom+2;
+				if (x-1>=0 && y-1>=0 && $item.eq(leftTop).css('display')=='block') {
+					$item.eq(leftTop).css('display','none');
+					if ($inner.eq(leftTop).html()=='') {
+						zeroOpen($inner.eq(leftTop));
+					}
+				}
+				if (x-1>=0 && $item.eq(topTop).css('display')=='block') {
+					$item.eq(topTop).css('display','none');
+					if ($inner.eq(topTop).html()=='') {
+						zeroOpen($inner.eq(topTop));
+					}
+				}
+				if (x-1>=0 && y+1<setDate[rank].columns && $item.eq(rightTop).css('display')=='block') {
+					$item.eq(rightTop).css('display','none');
+					if ($inner.eq(rightTop).html()=='') {
+						zeroOpen($inner.eq(rightTop));
+					}
+				}
+				if (y-1>=0 && $item.eq(leftLeft).css('display')=='block') {
+					$item.eq(leftLeft).css('display','none');
+					if ($inner.eq(leftLeft).html()=='') {
+						zeroOpen($inner.eq(leftLeft));
+					}
+				}
+				if (y+1<setDate[rank].columns && $item.eq(rightRight).css('display')=='block') {
+					$item.eq(rightRight).css('display','none');
+					if ($inner.eq(rightRight).html()=='') {
+						zeroOpen($inner.eq(rightRight));
+					}
+				}
+				if (x+1<setDate[rank].rows && y-1>=0 && $item.eq(leftBottom).css('display')=='block') {
+					$item.eq(leftBottom).css('display','none');
+					if ($inner.eq(leftBottom).html()=='') {
+						zeroOpen($inner.eq(leftBottom));
+					}
+				}
+				if (x+1<setDate[rank].rows && $item.eq(bottomBottom).css('display')=='block') {
+					$item.eq(bottomBottom).css('display','none');
+					if ($inner.eq(bottomBottom).html()=='') {
+						zeroOpen($inner.eq(bottomBottom));
+					}
+				}
+				if (x+1<setDate[rank].rows && y+1<setDate[rank].columns && $item.eq(rightBottom).css('display')=='block') {
+					$item.eq(rightBottom).css('display','none');
+					if ($inner.eq(rightBottom).html()=='') {
+						zeroOpen($inner.eq(rightBottom));
+					}
+				}
+			}
+		});
+	})
+	</script>
+</head>
+<body>
+	<div id="clickArea">
+		<p>赶快选择难度等级开始扫雷吧~</p>
+	</div>
+	<div id="control">
+		<select id="rank">
+			<option value="1" selected="true">简单</option>
+			<option value="2">中等</option>
+			<option value="3">困难</option>
+		</select>
+		<p class="showInfo">雷数量：<span id="bombNum">10</span></p>
+		<p class="showInfo">最快记录：<span id="records">--</span>s</p>
+		<br/><br/>	
+		<button id="start">开始</button>
+	</div>
+</body>
+</html>
