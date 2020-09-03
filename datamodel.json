@@ -1,0 +1,2494 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "field_def": {
+      "type": "object",
+      "required": [
+        "property",
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "property": {
+          "type": "string",
+          "title": "字段名",
+          "enumRequest": "request/fields?table=${encodeURI(datamodel.table)}&sql=${encodeURI(datamodel.sql)}&database=${encodeURI(datamodel.database)}",
+          "description": "用于描述该字段在数据库中的字段名"
+        },
+        "label": {
+          "type": "string",
+          "title": "标签名",
+          "description": "用于描述该字段展示的中文名称"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "mapping",
+            "money",
+            "text",
+            "number",
+            "date",
+            "file",
+            "image",
+            "multi_file",
+            "cascader",
+            "boolean",
+            "enum",
+            "search",
+            "hidden"
+          ],
+          "title": "类型",
+          "description": "用于描述该字段的类型"
+        },
+        "format": {
+          "type": "string",
+          "title": "格式",
+          "description": "用于type in[money，number,date]时用的格式"
+        },
+        "mapping": {
+          "type": "string",
+          "title": "映射",
+          "description": "当type in [mapping,cascader]时候必填,具体内容为mapping_defs里定义的内容"
+        },
+        "calculator": {
+          "type": "string",
+          "title": "计算",
+          "description": "用于生成一个新的计算字段，可在该文件中直接使用"
+        },
+        "joint": {
+          "type": "string",
+          "title": "关联",
+          "description": "当type in [grid,search,multi_search]时候必填，内容为joint_def 的名称，用于引用joint_def"
+        },
+        "cube_fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "property",
+              "label"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "joint_fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "property",
+              "label"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "property": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "width": {
+          "type": "integer"
+        }
+      }
+    },
+    "calculator_def": {
+      "type": "object",
+      "required": [
+        "property",
+        "label",
+        "calculator"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "property": {
+          "type": "string",
+          "title": "字段名",
+          "description": "用于描述该字段在数据库中的字段名"
+        },
+        "label": {
+          "type": "string",
+          "title": "标签名",
+          "description": "用于描述该字段展示的中文名称"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "mapping",
+            "money",
+            "date",
+            "file",
+            "multi_file",
+            "cascader",
+            "boolean"
+          ],
+          "title": "类型",
+          "description": "用于描述该字段的类型"
+        },
+        "format": {
+          "type": "string",
+          "title": "格式",
+          "description": "用于type in[money，number,date]时用的格式"
+        },
+        "calculator": {
+          "type": "string",
+          "title": "计算",
+          "description": "用于生成一个新的计算字段，可在该文件中直接使用"
+        },
+        "mapping": {
+          "type": "string",
+          "title": "映射",
+          "description": "当type in [mapping,cascader]时候必填,具体内容为mapping_defs里定义的内容"
+        }
+      }
+    },
+    "string_list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "action_list": {
+      "type": "array",
+      "items": {
+        "enumLocal": "datamodel.action_defs.map(x=>x.name)",
+        "type": "string"
+      }
+    },
+    "filter_list": {
+      "type": "array",
+      "$comment": "type=combo_text时必须有fields & hint,其他时候必须有field，type=search 必须有joint",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string",
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名"
+          },
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "boolean",
+              "date",
+              "number",
+              "enum",
+              "text",
+              "combo_text",
+              "search",
+              "date_between"
+            ],
+            "title": "类型",
+            "description": "用于描述该字段的类型"
+          },
+          "width": {
+            "type": "integer",
+            "title": "宽度",
+            "description": "可用于设置该筛选项的宽度"
+          },
+          "format": {
+            "type": "string",
+            "title": "格式",
+            "description": "用于type in[money，number,date]时用的格式"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名,可设置多个"
+          },
+          "cube_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "property",
+                "label"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "property": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "hint": {
+            "type": "string",
+            "title": "提示",
+            "description": "用于显示该筛选项的提示信息"
+          },
+          "default_value": {
+            "type": "string",
+            "title": "默认值",
+            "description": "设置默认筛选"
+          },
+          "joint": {
+            "type": "string",
+            "title": "关联",
+            "description": "当type in [grid,search,multi_search]时候必填，内容为joint_def 的名称，用于引用joint_def"
+          },
+          "joint_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "property",
+                "label"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "property": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "field_groups": {
+      "type": "array",
+      "items": {
+        "$comment": "fields,calculators,template&labels 必有一项",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "fields": {
+            "$ref": "#/definitions/string_list",
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名"
+          },
+          "calculators": {
+            "$ref": "#/definitions/string_list",
+            "title": "计算",
+            "description": "用于生成一个新的计算字段，可在该文件中直接使用"
+          },
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "label_width": {
+            "type": "integer",
+            "title": "标签名宽度",
+            "description": "设置标签名宽度"
+          },
+          "span": {
+            "type": "integer",
+            "title": "布局",
+            "description": "布局总共24列，可设置所占列数"
+          },
+          "align": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center",
+              "right"
+            ],
+            "title": "校准",
+            "description": "用于设置居左、居中、居右"
+          },
+          "fixed": {
+            "type": "string",
+            "enum": [
+              "left",
+              "right"
+            ],
+            "title": "固定位置",
+            "description": "可设置该列固定在最左侧或者最右侧"
+          },
+          "auto_height": {
+            "type": "boolean",
+            "title": "折行显示",
+            "description": "true时，当内容过多情况，可折行显示"
+          },
+          "template": {
+            "type": "string",
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名"
+          },
+          "catalog": {
+            "type": "string",
+            "title": "归类",
+            "description": "用于描述该字段的归类信息，可使用a.b.c.d的格式进行多级设置"
+          },
+          "optional": {
+            "type": "boolean",
+            "title": "是否可选",
+            "description": "标志该列是否出现在设置表头的可选项中"
+          }
+        }
+      }
+    },
+    "prefilters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "property",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "property": {
+            "type": "string",
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名,要求对应的list中必须设置的某个类型的过滤，否则不生效"
+          },
+          "value": {
+            "type": "string",
+            "title": "值",
+            "description": "这个表达式的返回结果将作为过滤字段的取值"
+          },
+          "operator": {
+            "type": "string",
+            "enum": [
+              "in",
+              "="
+            ],
+            "title": "operator",
+            "description": "目前支持的种类：in，="
+          }
+        }
+      },
+      "title": "筛选过滤",
+      "description": "用于筛选过滤，此处填写嵌套列表的显示条件"
+    },
+    "key_value_parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "property",
+          "result"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "property": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "input_parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "property",
+          "label",
+          "type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "property": {
+            "type": "string",
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名"
+          },
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "mapping",
+              "money",
+              "text",
+              "number",
+              "date",
+              "search",
+              "file",
+              "multi_file",
+              "cascader",
+              "boolean",
+              "json",
+              "qart",
+              "label",
+              "tip",
+              "hidden",
+              "textarea",
+              "grid",
+              "month",
+              "multi_search",
+              "multi_mapping",
+              "enum",
+              ""
+            ],
+            "title": "类型",
+            "description": "用于描述该字段的类型"
+          },
+          "mapping": {
+            "type": "string",
+            "title": "映射",
+            "enumLocal": "datamodel.mapping_defs.map(x=>x.name)",
+            "description": "当type in [mapping,cascader]时候必填,具体内容为mapping_defs里定义的内容"
+          },
+          "readonly": {
+            "type": "boolean",
+            "title": "是否可修改",
+            "description": "标注该控件是否可以修改，true 为不可修改，false 为可以"
+          },
+          "joint": {
+            "type": "string",
+            "title": "关联",
+            "description": "当type in [grid,search,multi_search]时候必填，内容为joint_def 的名称，用于引用joint_def"
+          },
+          "append": {
+            "type": "string",
+            "title": "append",
+            "description": "输入控件的后缀"
+          },
+          "prepend": {
+            "type": "string",
+            "title": "append",
+            "description": "输入控件的前缀"
+          },
+          "default_value": {
+            "type": "string",
+            "title": "默认值",
+            "description": "设置默认值"
+          },
+          "is_param": {
+            "type": "boolean",
+            "title": "is_param",
+            "description": "当is_param = true 的时候，该控件的改变将会回传服务器，服务器相应updator函数来进行前端控件属性的改变"
+          },
+          "updator": {
+            "type": "string",
+            "title": "更新函数",
+            "enumServer": "updators",
+            "description": "相应is_param的改变，修改本控件的属性值,关联本groovy文件中对应的自定义函数"
+          },
+          "label_width": {
+            "type": "integer",
+            "title": "标签名宽度",
+            "description": "设置标签名宽度"
+          },
+          "left": {
+            "type": "integer",
+            "title": "左起",
+            "description": "按照表单定义的栅格，左起位置"
+          },
+          "top": {
+            "type": "integer",
+            "title": "上起",
+            "description": "按照表单定义的栅格，上起位置"
+          },
+          "span": {
+            "type": "integer",
+            "title": "横向占列",
+            "description": "按照表单定义的栅格，定义所占列数"
+          },
+          "vspan": {
+            "type": "integer",
+            "title": "纵向占行",
+            "description": "按照表单定义的栅格，定义所占行数"
+          },
+          "required": {
+            "type": "boolean",
+            "title": "必填项",
+            "description": "为true时，该控件必填"
+          },
+          "text_template": {
+            "type": "string",
+            "title": "text_template",
+            "description": "type为search时，可设置joint里边的字段，表示显示在该控件表面的信息"
+          },
+          "manual_edit": {
+            "type": "boolean",
+            "title": "编辑",
+            "description": "标注该控件是否可以编辑，true为可以编辑"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "message",
+                "trigger"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "title": "信息",
+                  "description": "不满足规则时显示的错误文本"
+                },
+                "trigger": {
+                  "type": "string",
+                  "title": "trigger",
+                  "description": "校验的触发时机,blur或change"
+                },
+                "required": {
+                  "type": "boolean",
+                  "title": "必填项",
+                  "description": "为true时，该控件必填"
+                },
+                "pattern": {
+                  "type": "string",
+                  "title": "正则表达式",
+                  "description": "要求所输入的文本能够匹配正则表达式"
+                },
+                "max": {
+                  "type": "integer",
+                  "title": "最大值",
+                  "description": "约束属性，限制字数/长度不得大于max的值"
+                },
+                "min": {
+                  "type": "integer",
+                  "title": "最小值",
+                  "description": "约束属性，限制字数/长度不得小于min的值"
+                },
+                "type": {
+                  "type": "string",
+                  "title": "类型",
+                  "description": "当max或者min存在时可设置，如果设置为number,min或max则表示数值的大小，如果不设置，min或max则表示长度的大小"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "details_parameters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "relatedId",
+          "controls"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "子模型名称",
+            "description": "用于描述子模型的名称，为系统预定义的模型"
+          },
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "relatedId": {
+            "type": "string",
+            "title": "关联字段",
+            "description": "用于描述存储主模型key字段的值，用于关联主表"
+          },
+          "controls": {
+            "$ref": "#/definitions/input_parameters",
+            "title": "详情表输入框",
+            "description": "用来定义每个动作详情页中的输入参数"
+          }
+        }
+      }
+    },
+
+    "mapping_values": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "key",
+          "value"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "$comment": "原来的type为string number boolean，计划只支持一种String",
+            "type": "string",
+            "title": "key",
+            "description": "标识这个字典的key值，不可重复"
+          },
+          "value": {
+            "type": "string",
+            "title": "值",
+            "description": "标识这个字典的显示值，最好不要重复"
+          },
+          "children": {
+            "$ref": "#/definitions/mapping_values",
+            "title": "children",
+            "description": "类型等同于mapping_values,即递归嵌套,用来描述级联的下拉选择框 cascader"
+          }
+        }
+      }
+    },
+    "section_defs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "field_groups",
+          "actions"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "when": {
+            "type": "string",
+            "title": "when",
+            "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+          },
+          "page_groups": {
+            "$ref": "#/definitions/pages_def",
+            "title": "page_groups",
+            "description": "此处支持嵌套其他列表"
+          },
+          "field_groups": {
+            "$ref": "#/definitions/field_groups",
+            "title": "field_groups",
+            "description": "用来表示section的显示字段"
+          },
+          "actions": {
+            "$ref": "#/definitions/string_list",
+            "title": "动作按钮",
+            "description": "可填写该对象模型中action_defs中定义的所有动作按钮"
+          },
+          "label_width": {
+            "type": "integer",
+            "title": "标签名宽度",
+            "description": "设置标签名宽度"
+          },
+          "span": {
+            "type": "integer",
+            "title": "布局",
+            "description": "布局总共24列，可设置所占列数"
+          },
+          "dialog_pages": {
+            "$ref": "#/definitions/section_defs",
+            "title": "dialog_pages",
+            "description": "点击可显示一个弹窗页面，内容为sections"
+          },
+          "dialog_width": {
+            "type": "string",
+            "title": "dialog_width",
+            "description": "用于设置dialog_pages的宽度"
+          },
+          "field_groups_span": {
+            "type": "string",
+            "title": "布局",
+            "description": "field_groups所占布局列数"
+          },
+          "page_groups_span": {
+            "type": "string",
+            "title": "布局",
+            "description": "page_groups所占布局列数"
+          }
+        }
+      }
+    },
+    "detail_def": {
+      "type": "object",
+      "required": [
+        "label",
+        "title_template",
+        "actions",
+        "header",
+        "pages"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "标签名",
+          "description": "用于描述该字段展示的中文名称"
+        },
+        "title_template": {
+          "type": "string",
+          "title": "title_template",
+          "description": "明细页标题部分的内容模板"
+        },
+        "page_values_func": {
+          "type": "string",
+          "title": "page_values_func",
+          "description": "对groovy文件中一个函数名字的引用。该函数返回一个字典结果，并填充到env中，供一般表达式引用"
+        },
+        "actions": {
+          "$ref": "#/definitions/string_list",
+          "title": "动作按钮",
+          "description": "可填写该对象模型中action_defs中定义的所有动作按钮"
+        },
+        "bottom_actions": {
+          "$ref": "#/definitions/string_list",
+          "title": "动作按钮",
+          "description": "用来表示detail底部标题区的按钮，可填写该对象模型中action_defs中定义的所有动作按钮"
+        },
+        "header": {
+          "type": "object",
+          "required": [
+            "field_groups",
+            "actions"
+          ],
+          "properties": {
+            "field_groups": {
+              "$ref": "#/definitions/field_groups",
+              "title": "field_groups",
+              "description": "用来表示section的显示字段"
+            },
+            "actions": {
+              "$ref": "#/definitions/string_list",
+              "title": "动作按钮",
+              "description": "可填写该对象模型中action_defs中定义的所有动作按钮"
+            }
+          }
+        },
+        "sections": {
+          "$ref": "#/definitions/section_defs",
+          "title": "sections",
+          "description": "可显示sections内容"
+        },
+        "pages": {
+          "$ref": "#/definitions/pages_def",
+          "title": "页签",
+          "description": "可嵌套其他list"
+        },
+        "export_template_type": {
+          "type": "string",
+          "title": "导出模版类型",
+          "description": "用于标识导出模版类型"
+        }
+      }
+    },
+    "pages_def": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "sections"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "名称",
+            "description": "标志该页的名称，同一detail下不可重复"
+          },
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "when": {
+            "type": "string",
+            "title": "when",
+            "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+          },
+          "sections": {
+            "$ref": "#/definitions/section_defs",
+            "title": "sections",
+            "description": "可显示sections内容"
+          },
+          "list": {
+            "type": "object",
+            "required": [
+              "name",
+              "prefilters"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "名称",
+                "description": "标志该页的名称，同一detail下不可重复"
+              },
+              "when": {
+                "type": "string",
+                "title": "when",
+                "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+              },
+              "prefilters": {
+                "$ref": "#/definitions/prefilters"
+              }
+            }
+          }
+        }
+      }
+    },
+    "jsonReference": {
+      "type": "object",
+      "required": ["filename","key"],
+      "properties": {
+        "subproject": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        }
+      }
+    },
+
+
+    "detail_def2": {
+      "type": "object",
+      "required": [
+        "list"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "list": {
+          "$ref": "#/definitions/components_defs",
+          "title": "组件列表",
+          "description": "组件列表"
+        },
+        "page_values_func": {
+          "type": "string",
+          "title": "page_values_func",
+          "description": "对groovy文件中一个函数名字的引用。该函数返回一个字典结果，并填充到env中，供一般表达式引用"
+        },
+        "export_template_type": {
+          "type": "string",
+          "title": "导出模版类型",
+          "description": "用于标识导出模版类型"
+        }
+      },
+      "pageComponents": [
+        "comp_tab_grid_defs",
+        "comp_grid_defs",
+        "comp_list_reference_defs",
+        "comp_blank_def",
+        "comp_detail_title_def",
+        "comp_section_def",
+        "comp_actions_defs",
+        "comp_multi_text_defs",
+        "comp_image_defs",
+        "comp_key_value_def"
+      ]
+    },
+    "comp_tab_grid_defs": {
+      "type": "object",
+      "title": "tab_grid布局",
+      "description": "tab_grid布局组件的切页",
+      "comp_key": "tab_grid",
+      "required": [
+        "columns"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "type": "array",
+          "title": "切页数组",
+          "description": "切页的数组",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "label",
+              "list"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "名称",
+                "description": "标志该页的名称，同一detail下不可重复"
+              },
+              "label": {
+                "type": "string",
+                "title": "标签名",
+                "description": "用于描述该字段展示的中文名称"
+              },
+              "when": {
+                "type": "string",
+                "title": "when",
+                "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+              },
+              "list": {
+                "$ref": "#/definitions/components_defs",
+                "title": "组件列表",
+                "description": "下级组件列表"
+              }
+            }
+          }
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_actions_defs": {
+      "title": "操作按钮组",
+      "description": "可填写该对象模型中action_defs中定义的所有动作按钮",
+      "comp_key": "actions",
+      "type": "array",
+      "items": {
+        "enumLocal": "datamodel.action_defs.map(x=>x.name)",
+        "type": "string"
+      }
+    },
+    "comp_dialog_pages_defs": {
+      "type": "array",
+      "title": "dialog_pages",
+      "description": "点击可显示一个弹窗页面，内容为section",
+      "items": {
+        "type": "object",
+        "required": [
+          "label",
+          "field_groups"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "when": {
+            "type": "string",
+            "title": "when",
+            "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+          },
+          "dialog_width": {
+            "type": "string",
+            "title": "dialog_width",
+            "description": "用于设置dialog_pages的宽度"
+          },
+          "field_groups": {
+            "$ref": "#/definitions/comp_field_group_defs",
+            "title": "详情顶部信息",
+            "description": "用来表示section的显示字段"
+          }
+        }
+      }
+    },
+    "comp_grid_defs": {
+      "type": "object",
+      "title": "grid布局",
+      "description": "grid布局组件的列",
+      "comp_key": "grid",
+      "required": [
+        "columns",
+        "span"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "type": "array",
+          "title": "列数组",
+          "description": "栅格列的数组",
+          "items": {
+            "type": "object",
+            "required": [
+              "list",
+              "span"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "span": {
+                "type": "integer",
+                "title": "列宽",
+                "description": "column所占列宽(grid组件需要)"
+              },
+              "list": {
+                "$ref": "#/definitions/components_defs",
+                "title": "组件列表",
+                "description": "下级组件列表"
+              }
+            }
+          }
+        },
+        "align": {
+          "type": "string",
+          "title": "align",
+          "description": "垂直排列方式(top-顶部对齐, middle-居中, bottom-底部对齐)",
+          "enum": [
+            "top",
+            "middle",
+            "bottom"
+          ]
+        },
+        "gutter": {
+          "type": "integer",
+          "title": "栅格间隔",
+          "description": "栅格间隔(px)"
+        },
+        "justify": {
+          "type": "string",
+          "title": "justify",
+          "description": "水平排列方式(top-左对齐, end-右对齐, center-居中, space-around-两侧间隔相等, space-between-两端对齐)",
+          "enum": [
+            "start",
+            "end",
+            "center",
+            "space-around",
+            "space-between"
+          ]
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_section_def": {
+      "title": "section",
+      "description": "字段区块组件",
+      "comp_key": "section",
+      "type": "object",
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "标签名",
+          "description": "section标题"
+        },
+        "columns": {
+          "type": "array",
+          "title": "列数组",
+          "description": "栅格列的数组",
+          "items": {
+            "type": "object",
+            "required": [
+              "list",
+              "span"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "span": {
+                "type": "integer",
+                "title": "列宽",
+                "description": "column所占列宽(grid组件需要)"
+              },
+              "list": {
+                "$ref": "#/definitions/components_defs",
+                "title": "组件列表",
+                "description": "下级组件列表"
+              }
+            }
+          }
+        },
+        "when": {
+          "type": "string",
+          "title": "when",
+          "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+        },
+        "dialog_width": {
+          "type": "string",
+          "title": "dialog_width",
+          "description": "用于设置dialog_pages的宽度"
+        },
+        "dialog_pages": {
+          "$ref": "#/definitions/comp_dialog_pages_defs",
+          "title": "dialog_pages",
+          "description": "点击可显示一个弹窗页面，内容为section"
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_list_reference_defs": {
+      "type": "object",
+      "title": "列表引用",
+      "description": "对列表数据的引用",
+      "comp_key": "list",
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "名称",
+          "description": "标志该页的名称，同一detail下不可重复"
+        },
+        "when": {
+          "type": "string",
+          "title": "when",
+          "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+        },
+        "prefilters": {
+          "$ref": "#/definitions/prefilters",
+          "title": "筛选过滤",
+          "description": "用于筛选过滤，此处填写嵌套列表的显示条件"
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_blank_def": {
+      "title": "自定义组件",
+      "description": "自定义组件",
+      "comp_key": "blank",
+      "type": "object",
+      "required": [
+        "content_template"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "content_template": {
+          "type": "string",
+          "title": "内容模板",
+          "description": "内容的模板，可以用v-html进行渲染"
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_key_value_def": {
+      "title": "键值对",
+      "description": "键值对的表现形式",
+      "comp_key": "key_value",
+      "type": "object",
+      "required": [],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "标签名",
+          "description": "用于描述该字段展示的中文名称"
+        },
+        "label_width": {
+          "type": "integer",
+          "title": "标签名宽度",
+          "description": "设置标签名宽度"
+        },
+        "auto_height": {
+          "type": "boolean",
+          "title": "折行显示",
+          "description": "true时，当内容过多情况，可折行显示"
+        },
+        "template": {
+          "type": "string",
+          "title": "字段名",
+          "description": "用于描述该字段在数据库中的字段名"
+        },
+        "catalog": {
+          "type": "string",
+          "title": "归类",
+          "description": "用于描述该字段的归类信息，可使用a.b.c.d的格式进行多级设置"
+        },
+        "optional": {
+          "type": "boolean",
+          "title": "是否可选",
+          "description": "标志该列是否出现在设置表头的可选项中"
+        },
+        "fields": {
+          "$ref": "#/definitions/string_list",
+          "title": "字段名",
+          "description": "用于描述该字段在数据库中的字段名"
+        },
+        "calculators": {
+          "$ref": "#/definitions/string_list",
+          "title": "计算",
+          "description": "用于生成一个新的计算字段，可在该文件中直接使用"
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_detail_title_def": {
+      "title": "detail_title",
+      "description": "详情页标题组件",
+      "comp_key": "detail_title",
+      "type": "object",
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "标签名",
+          "description": "用于描述该字段展示的中文名称"
+        },
+        "title_template": {
+          "type": "string",
+          "title": "title_template",
+          "description": "明细页标题部分的内容模板(模板内不能包含大括号{})"
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_multi_text_defs": {
+      "title": "文本内容",
+      "description": "多行文本内容",
+      "comp_key": "multi_text",
+      "type": "object",
+      "required": [
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "multi_string",
+          "title": "文本",
+          "description": "文本内容"
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "comp_image_defs": {
+      "title": "图片",
+      "description": "图片内容",
+      "comp_key": "image",
+      "type": "object",
+      "required": [
+        "src"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "src": {
+          "type": "string",
+          "title": "图片链接",
+          "description": "图片链接地址"
+        },
+        "width": {
+          "type": "integer",
+          "title": "宽",
+          "description": "图片宽度"
+        },
+        "height": {
+          "type": "integer",
+          "title": "高",
+          "description": "图片高度"
+        },
+        "css": {
+          "type": "string",
+          "title": "样式",
+          "description": "组件自定义样式"
+        }
+      }
+    },
+    "components_defs": {
+      "type": "array",
+      "title": "组件列表",
+      "description": "组件列表",
+      "items": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "类型",
+            "description": "组件类型",
+            "enum": [
+              "grid",
+              "tab_grid",
+              "blank",
+              "detail_title",
+              "actions",
+              "header_field_groups",
+              "section",
+              "list",
+              "image",
+              "multi_text",
+              "key_value"
+            ]
+          },
+          "grid": {
+            "$ref": "#/definitions/comp_grid_defs",
+            "title": "grid布局",
+            "description": "grid布局组件的列"
+          },
+          "tab_grid": {
+            "$ref": "#/definitions/comp_tab_grid_defs",
+            "title": "tab_grid布局",
+            "description": "tab_grid布局组件的切页"
+          },
+          "key_value": {
+            "$ref": "#/definitions/comp_key_value_def",
+            "title": "键值对",
+            "description": "键值对的表现形式"
+          },
+          "blank": {
+            "$ref": "#/definitions/comp_blank_def",
+            "title": "自定义组件",
+            "description": "自定义组件"
+          },
+          "detail_title": {
+            "$ref": "#/definitions/comp_detail_title_def",
+            "title": "detail_title",
+            "description": "详情页标题组件"
+          },
+          "actions": {
+            "$ref": "#/definitions/comp_actions_defs",
+            "title": "操作按钮组",
+            "description": "可填写该对象模型中action_defs中定义的所有动作按钮"
+          },
+          "section": {
+            "$ref": "#/definitions/comp_section_def",
+            "title": "section",
+            "description": "字段区块组件"
+          },
+          "list": {
+            "$ref": "#/definitions/comp_list_reference_defs",
+            "title": "list引用",
+            "description": "list页的引用组件"
+          },
+          "multi_text": {
+            "$ref": "#/definitions/comp_multi_text_defs",
+            "title": "文本内容",
+            "description": "多行文本内容"
+          },
+          "image": {
+            "$ref": "#/definitions/comp_image_defs",
+            "title": "图片",
+            "description": "图片内容"
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "required": [
+    "table",
+    "database",
+    "key_field",
+    "mapping_defs",
+    "joint_defs",
+    "field_defs",
+    "calculator_defs",
+    "action_defs",
+    "list",
+    "detail"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "table": {
+      "type": "string",
+      "title": "表名称",
+      "enumRequest": "request/tables?database=${encodeURI(datamodel.database)}",
+      "description": "描述这个数据对象关联的数据库表"
+    },
+    "sql": {
+      "type": "string",
+      "title": "查询语句",
+      "description": "用于从一个SQL语句构造的视图中查询和展示数据"
+    },
+    "log_model_name": {
+      "type": "string",
+      "title": "日志名称",
+      "enumRequest": "request/tables?database=${encodeURI(datamodel.database)}",
+      "enumServer": "datamodels",
+      "description": "用于标识当前model的动作记录在操作日志数据表里的数据的model_name。可能有多个数据对象来源于同一个数据表，同统一的log对象名称方便数据进行回溯和跟踪"
+    },
+    "database": {
+      "type": "string",
+      "enumServer": "databases",
+      "title": "数据源名",
+      "description": "描述这个数据对象关联的数据库表所在的数据源名称"
+    },
+    "key_field": {
+      "type": "string",
+      "enumLocal": "datamodel.field_defs.map(x=>x.property)",
+      "title": "主键",
+      "description": "描述这个数据对象在数据库表中的唯一主键，一般为id"
+    },
+    "data_right": {
+      "type": "boolean",
+      "title": "数据权限",
+      "description": "为true时表示让该数据对象支持数据权限"
+    },
+    "sequence_generator": {
+      "type": "object",
+      "required": [
+        "field",
+        "prefix"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "type": "string",
+          "title": "字段名",
+          "enumRequest": "request/fields?table=${encodeURI(datamodel.table)}&sql=${encodeURI(datamodel.sql)}&database=${encodeURI(datamodel.database)}",
+          "description": "自动生成编码的字段"
+        },
+        "prefix": {
+          "type": "string",
+          "title": "编码前缀",
+          "description": "用来描述新产生数据的编码值，编码由编码前缀，YYYYMMDDhhmmss+9位随机数构成，此为编码前缀"
+        }
+      },
+      "title": "序列号生成器",
+      "description": "为这个数据记录生成指定规则的序列号"
+    },
+    "order_by": {
+      "type": "object",
+      "required": [
+        "column",
+        "order"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "type": "string",
+          "title": "列名",
+          "description": "默认排序的列名"
+        },
+        "order": {
+          "type": "string",
+          "enum": [
+            "desc",
+            "asc"
+          ],
+          "title": "排序规则",
+          "description": "倒序 desc 升序 asc"
+        }
+      },
+      "title": "排序方式",
+      "description": "设置该列表默认的排序方式"
+    },
+    "group_sums": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enumLocal": "datamodel.field_defs.map(x=>x.property)",
+        "title": "数据库字段名",
+        "description": "用于可进行求和运算的数据库字段，要求数据为int，float 或money类型"
+      },
+      "title": "统计字段",
+      "description": "统计视图中作为度量值的字段"
+    },
+    "joint_defs": {
+      "type": "array",
+      "items": {
+        "$comment": "sql 和 table 必居其一",
+        "type": "object",
+        "required": [
+          "name",
+          "key_field",
+          "joint_field",
+          "field_defs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "名称",
+            "description": "标志该joint的名称，不能重复"
+          },
+          "database": {
+            "type": "string",
+            "title": "数据源名",
+            "enumServer": "databases",
+            "description": "描述joint关联的数据表所在的数据源名称"
+          },
+          "sql": {
+            "type": "string",
+            "title": "查询语句",
+            "description": "用于从一个SQL语句构造的视图中查询和展示数据"
+          },
+          "table": {
+            "type": "string",
+            "title": "表名称",
+            "enumRequest": "request/tables?database=${encodeURI(datamodel.database)}",
+            "description": "描述joint关联的数据库表"
+          },
+          "key_field": {
+            "type": "string",
+            "title": "主键",
+            "description": "主键"
+          },
+          "joint_field": {
+            "type": "string",
+            "title": "外键",
+            "description": "关联字段，当原表和该表进行关联的时候，用该字段的价值和源字段的值进行关联"
+          },
+          "order_field": {
+            "type": "string"
+          },
+          "order_direct": {
+            "type": "string"
+          },
+          "field_defs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/field_def"
+            },
+            "title": "字段",
+            "description": "用于描述这个数据对象关联时要用到的关联字段"
+          }
+        }
+      }
+    },
+    "mapping_defs": {
+      "type": "array",
+      "$comment": "需要程序验证mapping_values,sql,custom_func 三者有且只有一项,database 只与SQLsql搭配",
+      "items": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "名称",
+            "description": "标识该mapping的名称，不能重复"
+          },
+          "mapping_values": {
+            "$ref": "#/definitions/mapping_values"
+          },
+          "sql": {
+            "type": "string",
+            "title": "查询语句",
+            "description": "用于从一个SQL语句构造的视图中查询和展示数据"
+          },
+          "database": {
+            "type": "string",
+            "title": "数据源名",
+            "enumServer": "databases",
+            "description": "描述该数据查询的数据源名称"
+          },
+          "custom_func": {
+            "type": "string",
+            "title": "custom_func",
+            "description": "可以定义一个函数，用该函数的返回值"
+          }
+        }
+      }
+    },
+    "joint_refs":{
+      "type": "array",
+      "$comment": "引用Json中定义的对象",
+      "items": {
+        "$ref": "#/definitions/jsonReference"
+      }
+    },
+    "mapping_refs":{
+      "type": "array",
+      "$comment": "引用Json中定义的对象",
+      "items": {
+        "$ref": "#/definitions/jsonReference"
+      }
+    },
+    "field_defs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/field_def"
+      },
+      "title": "字段",
+      "description": "该对象模型中用到的所有字段"
+    },
+    "calculator_defs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/calculator_def"
+      },
+      "title": "字段",
+      "description": "该对象模型中用到的计算值"
+    },
+    "action_defs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "behavior",
+          "container",
+          "forward",
+          "when",
+          "parameters",
+          "prompt"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "名称",
+            "description": "标识该action的名称，不能重复"
+          },
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "behavior": {
+            "type": "string",
+            "enumServer": "behaviors",
+            "title": "行为",
+            "description": "标识动作所执行的行为，\"insert\",\"update\",\"delete\" 为默认支持的行为，其他行为取值为存放该groovy文件中的自定义函数。配置可通过增加自定义函数的方式扩展系统的行为功能。"
+          },
+          "container": {
+            "type": "string",
+            "enum": [
+              "dialog",
+              "page",
+              "batch",
+              "detail_dialog",
+              "redirect",
+              ""
+            ],
+            "title": "页面展示形式",
+            "description": "取值为 【'page','dialog','','batch','detail_dialog','redirect'】之一"
+          },
+          "forward": {
+            "type": "string",
+            "title": "跳转",
+            "description": "执行完该动作的跳转页面,可以使用close关闭当前tab-sheet页"
+          },
+          "when": {
+            "type": "string",
+            "title": "when",
+            "description": "表达式的结果决定该section是否显示，支持的参数有object和env"
+          },
+          "enabled": {
+            "type": "string",
+            "title": "是否禁用",
+            "description": "为真的状态的时候就是可用状态，为假的状态的时候就是禁用状态"
+          },
+          "on": {
+            "type": "string",
+            "enum": [
+              "list",
+              "object",
+              "none"
+            ],
+            "title": "on",
+            "description": "该action执行是面对的选择对象，取值有list,object,none"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "prompt",
+            "description": "该action的执行界面弹出时，显示的解释文字或提示文字"
+          },
+          "confirm_caption": {
+            "type": "string",
+            "title": "按钮名称",
+            "description": "该action的执行界面弹出时，显示的按钮文字"
+          },
+          "open_in_new_tab": {
+            "type": "boolean",
+            "title": "打开新页",
+            "description": "为true时，表示该action执行完毕后打开新页签"
+          },
+          "validator": {
+            "type": "string",
+            "title": "验证函数",
+            "enumServer": "validators",
+            "description": "标识动作执行前的验证行为，取值为存放该py文件中的自定义函数。配置可通过增加自定义函数的方式扩展系统的行为调用前的检查输入有效性。"
+          },
+          "label_width": {
+            "type": "integer",
+            "title": "标签名宽度",
+            "description": "设置标签名宽度"
+          },
+          "size_percent": {
+            "type": "integer",
+            "title": "百分比",
+            "description": "标识该动作的构造界面占全屏幕的百分比"
+          },
+          "batch": {
+            "type": "object",
+            "title": "批量处理",
+            "description": "表示执行批量处理操作",
+            "additionalProperties": false,
+            "properties": {
+              "keys": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "用于验证这条记录是否唯一"
+              },
+              "schemas": {
+                "type": "array",
+                "title": "方案",
+                "description": "方案列表，可以设置多个方案，默认为第一个",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label",
+                    "columns"
+                  ],
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "title": "标签名",
+                      "description": "用于描述该模板展示的中文名称"
+                    },
+                    "sheet": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "title": "sheet",
+                      "description": "用于描述读取的所上传的excel的sheet"
+                    },
+                    "start_row": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "title": "start_row",
+                      "description": "用于描述读取的所上传的excel的开始行数"
+                    },
+                    "columns": {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "minItems": 1,
+                      "title": "列配置",
+                      "description": "列配置，跟Excel列对应"
+                    }
+                  }
+                }
+              },
+              "close_on_success": {
+                "type": "boolean",
+                "title": "上传成功后是否关闭",
+                "description": "表示上传成功后是否关闭对话框，默认true关闭"
+              },
+              "remote_files": {
+                "type": "array",
+                "title": "远程文件",
+                "description": "可以直接选择上传远程服务器文件，而不需要在本地下载后再点击上传",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label",
+                    "type"
+                  ],
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "title": "标签名",
+                      "description": "用于描述该文件展示的中文名称"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "text",
+                        "mapping"
+                      ],
+                      "title": "类型",
+                      "description": "目前只支持text，mapping类型"
+                    },
+                    "mapping": {
+                      "type": "string",
+                      "title": "mapping",
+                      "description": "当type为mapping时，需要写mapping"
+                    }
+                  }
+                }
+              },
+              "data_sources": {
+                "type": "array",
+                "title": "可选数据源",
+                "description": "可选数据源，对于已经上传的数据，可以通过data_sources读取到批量操作页面",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "label",
+                    "request_func"
+                  ],
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "title": "标签名",
+                      "description": "用于描述该可选数据源展示的中文名称"
+                    },
+                    "request_func": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "parameters": {
+            "type": "object",
+            "title": "参数",
+            "description": "执行动作所需要的参数",
+            "required": [
+              "server",
+              "inputs"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "server": {
+                "$ref": "#/definitions/key_value_parameters"
+              },
+              "inputs": {
+                "$ref": "#/definitions/input_parameters",
+                "title": "输入框",
+                "description": "用来定义每个动作的输入参数"
+              },
+              "list": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "property",
+                    "type"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "property": {
+                      "type": "string",
+                      "title": "字段名",
+                      "description": "用于描述该字段在数据库中的字段名"
+                    },
+                    "label": {
+                      "type": "string",
+                      "title": "标签名",
+                      "description": "用于描述该字段展示的中文名称"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "money",
+                        "text",
+                        "number",
+                        "mapping",
+                        "date",
+                        "dynamic"
+                      ],
+                      "title": "类型",
+                      "description": "用于描述该字段的类型"
+                    },
+                    "mapping": {
+                      "type": "string",
+                      "title": "mapping",
+                      "description": "当type为mapping时，需要写mapping"
+                    },
+                    "default_value": {
+                      "type": "string",
+                      "title": "默认值",
+                      "description": "设置默认值"
+                    },
+                    "ignore_space": {
+                      "type": "boolean",
+                      "title": "忽略空格",
+                      "description": "表示忽略空格，主要用于一些银行卡格式的字段"
+                    },
+                    "support_negative": {
+                      "type": "boolean"
+                    },
+                    "required": {
+                      "type": "boolean",
+                      "title": "是否必填",
+                      "description": "当required 为true时，要求该内容不能为空"
+                    },
+                    "rules": {
+                      "type": "array",
+                      "title": "规则",
+                      "description": "元素为该控件的客户端校验规则",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "message"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "message": {
+                            "type": "string",
+                            "title": "信息",
+                            "description": "不满足规则时显示的错误文本"
+                          },
+                          "pattern": {
+                            "type": "string",
+                            "title": "正则表达式",
+                            "description": "要求所输入的文本能够匹配正则表达式"
+                          },
+                          "max": {
+                            "type": "integer",
+                            "title": "最大值",
+                            "description": "约束属性，限制字数/长度不得大于max的值"
+                          },
+                          "min": {
+                            "type": "integer",
+                            "title": "最小值",
+                            "description": "约束属性，限制字数/长度不得小于min的值"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "details": {
+                "$ref": "#/definitions/details_parameters",
+                "title": "详情列表",
+                "description": "用于定义参与该动作动作的详情列表"
+
+              }
+            }
+          },
+          "calls": {
+            "type": "array",
+            "title": "调用",
+            "description": "可以在本action中指定调用其他datamodel的action",
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "parameters",
+                "selected_list"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "名称",
+                  "description": "标识被调用action的名称，不能重复，具体规则为model_name(名称).action(名称)"
+                },
+                "foreach": {
+                  "type": "string",
+                  "description": "一般来说，返回多个，系统会根据返回的结果循环执行该action"
+                },
+                "selected_list": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "parameters": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "property",
+                      "value"
+                    ],
+                    "properties": {
+                      "property": {
+                        "type": "string",
+                        "title": "字段名",
+                        "description": "用于描述该字段在数据库中的字段名"
+                      },
+                      "value": {
+                        "type": "string",
+                        "title": "值",
+                        "description": "该字段对应的值"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "remote_call": {
+            "title": "远程接口调用",
+            "type": "object",
+            "required": [
+              "intf",
+              "parameters"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "intf": {
+                "type": "object",
+                "required": [
+                  "method",
+                  "type"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "method": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "wsdl": {
+                    "type": "string"
+                  },
+                  "target_namespace": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "content_type": {
+                    "type": "string"
+                  }
+                }
+              },
+              "parameters": {
+                "type": "object",
+                "required": [
+                  "args",
+                  "kwargs"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "args": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "kwargs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "property",
+                        "value"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "property": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "headers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "name",
+                        "value"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "need_title": {
+            "title": "表单是否显示标题区",
+            "type": "boolean",
+            "description": "是否使用表单默认的标题区"
+          },
+          "need_footer": {
+            "title": "是否显示底部执行区",
+            "type": "boolean",
+            "description": "是否使用表单默认的底部标题栏"
+          },
+          "css": {
+            "title": "表单样式",
+            "type": "string",
+            "description": "表单的样式用CSS来描述"
+          },
+          "back_image": {
+            "title": "表单背景图",
+            "type": "string",
+            "description": "表单背景图"
+          },
+          "col_count": {
+            "type": "integer",
+            "title": "表单栅格列数",
+            "description": "定义表单栅格的列数，行数为自增长"
+          }
+        }
+      }
+    },
+    "org_filter": {
+      "type": "object",
+      "required": [
+        "scene",
+        "field"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "scene": {
+          "type": "string",
+          "title": "场景",
+          "description": "用于设置场景,目前是SP和CLIENT"
+        },
+        "field": {
+          "type": "string",
+          "title": "值",
+          "description": "与general_orgpassport表里的scene_org_id字段相对应"
+        }
+      }
+    },
+    "list": {
+      "type": "object",
+      "required": [
+        "label",
+        "filters",
+        "actions",
+        "field_groups"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "title": "名称",
+          "description": "表示该列表的显示名称"
+        },
+        "summary": {
+          "type": "string",
+          "title": "汇总",
+          "description": "用来显示汇总信息,可汇总列表里显示的数据的相关信息"
+        },
+        "export_template_type": {
+          "type": "string",
+          "title": "模板类型名称",
+          "description": "用来显示导出模板的类型"
+        },
+        "export_name_template": {
+          "type": "string",
+          "title": "模板导出名称",
+          "description": "用来显示导出模板的名称的前缀"
+        },
+        "filters": {
+          "$ref": "#/definitions/filter_list",
+          "title": "筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项"
+        },
+        "date_filters": {
+          "$ref": "#/definitions/filter_list",
+          "title": "日期格式筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项"
+        },
+        "boolean_filters": {
+          "$ref": "#/definitions/filter_list",
+          "title": "布尔格式筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项"
+        },
+        "text_filters": {
+          "$ref": "#/definitions/filter_list",
+          "title": "文本格式筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项"
+        },
+        "combo_text_filters": {
+          "type": "array",
+          "title": "多文本格式筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项",
+          "items": {
+            "type": "object",
+            "required": [
+              "fields",
+              "label",
+              "hint"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "title": "字段名",
+                "description": "用于描述该字段在数据库中的字段名"
+              },
+              "label": {
+                "type": "string",
+                "title": "名称",
+                "description": "表示该筛选框的显示名称"
+              },
+              "hint": {
+                "type": "string",
+                "title": "提示",
+                "description": "表示该筛选框的提示文字"
+              },
+              "width": {
+                "type": "integer",
+                "title": "宽度",
+                "description": "表示该筛选框的宽度"
+              }
+            }
+          }
+        },
+        "number_filters": {
+          "$ref": "#/definitions/filter_list",
+          "title": "数值格式筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项"
+        },
+        "search_filters": {
+          "type": "array",
+          "title": "关联查找格式筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项",
+          "items": {
+            "type": "object",
+            "required": [
+              "field",
+              "label",
+              "joint"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "type": "string",
+                "title": "字段名",
+                "description": "用于描述该字段在数据库中的字段名"
+              },
+              "label": {
+                "type": "string",
+                "title": "名称",
+                "description": "表示该筛选框的显示名称"
+              },
+              "joint": {
+                "type": "string",
+                "title": "关联",
+                "description": "当type为search时候必填，内容为joint_def的名称，用于引用joint_def"
+              },
+              "width": {
+                "type": "integer",
+                "title": "宽度",
+                "description": "表示该筛选框的宽度"
+              },
+              "cube_fields": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "property",
+                    "label"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "property": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "enum_filters": {
+          "$ref": "#/definitions/filter_list",
+          "title": "枚举格式筛选过滤",
+          "description": "用于筛选过滤，此处填写可筛选项"
+        },
+        "actions": {
+          "$ref": "#/definitions/action_list",
+          "title": "按钮",
+          "description": "用来标识这个操作区的按钮，元素为字符串，即action_def的name，是action_def的引用"
+        },
+        "row_actions": {
+          "$ref": "#/definitions/action_list",
+          "title": "按钮",
+          "description": "用来标识可对这条记录的操作的按钮，即action_def的name，显示在列表每一条记录的操作区"
+        },
+        "detail_action_visible": {
+          "type": "boolean",
+          "title": "详情",
+          "description": "布尔类型，为true时显示‘详情’操作，为false时则不显示"
+        },
+        "field_groups": {
+          "$ref": "#/definitions/field_groups",
+          "title": "field_groups",
+          "description": "用来表示列表显示的字段"
+        },
+        "pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "title",
+              "prefilters",
+              "field_groups"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "title": "名称",
+                "description": "标识这个页签的名称，不能重复"
+              },
+              "title": {
+                "type": "string",
+                "title": "标识名称",
+                "description": "显示在页面的页签的名称"
+              },
+              "summary": {
+                "type": "string",
+                "title": "汇总",
+                "description": "用来显示汇总信息,可汇总列表里显示的数据的相关信息"
+              },
+              "field_groups": {
+                "$ref": "#/definitions/field_groups",
+                "title": "field_groups",
+                "description": "用来表示页签显示的字段"
+              },
+              "prefilters": {
+                "$ref": "#/definitions/prefilters",
+                "title": "筛选过滤",
+                "description": "用于筛选过滤，此处填写该页签内容的显示条件"
+              },
+              "actions": {
+                "$ref": "#/definitions/string_list",
+                "title": "按钮",
+                "description": "用来标识这个操作区的按钮，元素为字符串，即action_def的name，是action_def的引用"
+              }
+            }
+          }
+        }
+      }
+    },
+    "cube_schemas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "groupbys",
+          "crosses"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "groupbys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "crosses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "measure",
+                "dimensions"
+              ],
+              "properties": {
+                "measure": {
+                  "type": "string"
+                },
+                "dimensions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "detail": {
+      "$ref": "#/definitions/detail_def"
+    },
+    "detail2": {
+      "$ref": "#/definitions/detail_def2"
+    },
+    "mini_detail": {
+      "type": "object",
+      "title": "详情",
+      "description": "用于配置在列表页显示更多信息",
+      "required": [
+        "pages"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "expand_first": {
+          "type": "boolean",
+          "title": "是否展开",
+          "description": "布尔类型，为true时则自动展开mini_detail中配置的内容"
+        },
+        "pages": {
+          "$ref": "#/definitions/pages_def",
+          "title": "页签",
+          "description": "用于展示mini_detail中配置的具体内容"
+        }
+      }
+    }
+  }
+}
