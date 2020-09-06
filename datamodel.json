@@ -969,12 +969,93 @@
     },
     "comp_actions_defs": {
       "title": "操作按钮组",
-      "description": "可填写该对象模型中action_defs中定义的所有动作按钮",
+      "description": "操作按钮组，存放action操作按钮",
       "comp_key": "actions",
+      "type": "object",
+      "required": [
+        "action_list"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "action_list": {
+          "title": "按钮列表",
+          "description": "可填写该对象模型中action_defs中定义的所有动作按钮",
+          "type": "array",
+          "items": {
+            "enumLocal": "datamodel.action_defs.map(x=>x.name)",
+            "type": "string"
+          }
+        },
+        "justify": {
+          "type": "string",
+          "title": "justify",
+          "description": "水平排列方式(start-左对齐, end-右对齐, center-居中, space-around-两侧间隔相等, space-between-两端对齐)",
+          "enum": [
+            "start",
+            "end",
+            "center",
+            "space-around",
+            "space-between"
+          ]
+        }
+      }
+    },
+    "comp_field_group_defs": {
       "type": "array",
+      "title": "field_group",
+      "description": "用来表示section的显示字段",
+      "comp_key": "header_field_groups",
       "items": {
-        "enumLocal": "datamodel.action_defs.map(x=>x.name)",
-        "type": "string"
+        "type": "object",
+        "required": [],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "标签名",
+            "description": "用于描述该字段展示的中文名称"
+          },
+          "label_width": {
+            "type": "integer",
+            "title": "标签名宽度",
+            "description": "设置标签名宽度"
+          },
+          "span": {
+            "type": "integer",
+            "title": "布局",
+            "description": "布局总共24列，可设置所占列数"
+          },
+          "auto_height": {
+            "type": "boolean",
+            "title": "折行显示",
+            "description": "true时，当内容过多情况，可折行显示"
+          },
+          "template": {
+            "type": "string",
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名"
+          },
+          "catalog": {
+            "type": "string",
+            "title": "归类",
+            "description": "用于描述该字段的归类信息，可使用a.b.c.d的格式进行多级设置"
+          },
+          "optional": {
+            "type": "boolean",
+            "title": "是否可选",
+            "description": "标志该列是否出现在设置表头的可选项中"
+          },
+          "fields": {
+            "$ref": "#/definitions/string_list",
+            "title": "字段名",
+            "description": "用于描述该字段在数据库中的字段名"
+          },
+          "calculators": {
+            "$ref": "#/definitions/string_list",
+            "title": "计算",
+            "description": "用于生成一个新的计算字段，可在该文件中直接使用"
+          }
+        }
       }
     },
     "comp_dialog_pages_defs": {
@@ -1066,7 +1147,7 @@
         "justify": {
           "type": "string",
           "title": "justify",
-          "description": "水平排列方式(top-左对齐, end-右对齐, center-居中, space-around-两侧间隔相等, space-between-两端对齐)",
+          "description": "水平排列方式(start-左对齐, end-右对齐, center-居中, space-around-两侧间隔相等, space-between-两端对齐)",
           "enum": [
             "start",
             "end",
